@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pokémon Champions Type Quick Checker</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#171a21;
+    --panel-2:#1e232d;
+    --text:#f5f7fb;
+    --muted:#aeb6c4;
+    --border:#303744;
+    --accent:#7aa2ff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:linear-gradient(180deg,#0d0f13,#131720 55%,#0d0f13);
+    color:var(--text);
+  }
+  .app{width:min(1000px,100%);margin:0 auto;padding:22px 14px 34px}
+  .hero{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;margin-bottom:16px}
+  h1{font-size:clamp(24px,4vw,38px);margin:0 0 6px}
+  .sub{color:var(--muted);margin:0;line-height:1.45}
+  .mode{display:flex;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:6px}
+  .mode button{
+    border:0;padding:10px 14px;border-radius:10px;background:transparent;color:var(--muted);
+    font-weight:800;cursor:pointer;min-height:42px
+  }
+  .mode button.active{background:#eef3ff;color:#11151d}
+  .types{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin:14px 0 18px}
+  .type-btn{
+    border:1px solid var(--border);color:white;border-radius:14px;padding:10px 7px;cursor:pointer;
+    min-height:84px;display:flex;flex-direction:column;gap:7px;align-items:center;justify-content:center;
+    font-weight:800;letter-spacing:.1px;transition:transform .12s ease,border-color .12s ease,filter .12s ease
+  }
+  .type-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+  .type-btn.active{outline:3px solid white;outline-offset:2px}
+  .ico{
+    width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);
+    display:grid;place-items:center;border:1px solid rgba(255,255,255,.2)
+  }
+  .ico svg,.bigicon svg,.mini svg{width:24px;height:24px;display:block}
+  .label{font-size:12px}
+  .result{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:16px}
+  .selected{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}
+  .selected-left{display:flex;gap:11px;align-items:center;min-width:0}
+  .selected .bigicon{
+    width:54px;height:54px;border-radius:16px;display:grid;place-items:center;
+    border:1px solid rgba(255,255,255,.24)
+  }
+  .selected h2{margin:0;font-size:24px}
+  .selected p{margin:2px 0 0;color:var(--muted);font-size:13px}
+  .mode-pill{
+    border:1px solid var(--border);background:var(--panel-2);border-radius:999px;
+    padding:8px 11px;color:var(--muted);font-weight:800;font-size:12px;white-space:nowrap
+  }
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .box{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:13px}
+  .box h3{margin:0 0 9px;font-size:13px;text-transform:uppercase;letter-spacing:.7px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 9px;
+    border:1px solid var(--border);font-size:12px;font-weight:800;background:#151922
+  }
+  .chip .mini{
+    width:21px;height:21px;border-radius:50%;display:grid;place-items:center;
+    background:rgba(255,255,255,.16)
+  }
+  .empty{color:var(--muted);font-size:13px}
+  .foot{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.5}
+
+  .Normal{background:#8a8f98}.Fire{background:#d85b3a}.Water{background:#3b82c4}
+  .Electric{background:#d9aa22}.Grass{background:#4c9a54}.Ice{background:#55a9b4}
+  .Fighting{background:#b84c3f}.Poison{background:#8f56a3}.Ground{background:#a67c4d}
+  .Flying{background:#6c86c7}.Psychic{background:#d85b8a}.Bug{background:#7e9836}
+  .Rock{background:#8d7850}.Ghost{background:#625d8d}.Dragon{background:#6154ad}
+  .Dark{background:#514b50}.Steel{background:#6f8792}.Fairy{background:#c969a7}
+
+  @media(max-width:760px){
+    .hero{align-items:stretch;flex-direction:column}
+    .mode{width:100%}
+    .mode button{flex:1}
+    .types{grid-template-columns:repeat(3,1fr)}
+  }
+  @media(max-width:460px){
+    .grid{grid-template-columns:1fr}
+    .type-btn{min-height:78px}
+    .label{font-size:11px}
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="hero">
+    <div>
+      <h1>Pokémon Type Quick Checker</h1>
+      <p class="sub">Tap a type and instantly see what is <b>super effective</b>, <b>effective</b>, <b>not very effective</b>, or has <b>no effect</b>.</p>
+    </div>
+    <div class="mode" aria-label="Mode">
+      <button id="attackMode" class="active" type="button">Attacking</button>
+      <button id="defendMode" type="button">Defending</button>
+    </div>
+  </section>
+
+  <section id="typeButtons" class="types" aria-label="Pokémon types"></section>
+
+  <section class="result">
+    <div class="selected">
+      <div class="selected-left">
+        <div id="selectedIcon" class="bigicon Fire"></div>
+        <div>
+          <h2 id="selectedName">Fire</h2>
+          <p id="selectedDesc">When a Fire-type move attacks...</p>
+        </div>
+      </div>
+      <div id="modePill" class="mode-pill">ATTACKING</div>
+    </div>
+
+    <div class="grid">
+      <div class="box">
+        <h3 id="goodTitle">Super effective</h3>
+        <div id="good" class="chips"></div>
+      </div>
+      <div class="box">
+        <h3 id="neutralTitle">Effective</h3>
+        <div id="neutral" class="chips"></div>
+      </div>
+      <div class="box">
+        <h3 id="badTitle">Not very effective</h3>
+        <div id="bad" class="chips"></div>
+      </div>
+      <div class="box">
+        <h3>No effect</h3>
+        <div id="zero" class="chips"></div>
+      </div>
+    </div>
+
+    <p class="foot">These are custom vector-style type icons for quick reference. Dual-type interactions still combine both defending types in the actual games.</p>
+  </section>
+</main>
+
+<script>
+const iconStroke = `stroke="white" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+
+const icons = {
+  Normal: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.2" ${iconStroke}/></svg>`,
+  Fire: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3c1 3-1 4.5-1 6 0 1.3 1 2.1 2.2 2.1 1.9 0 3-1.8 2.8-4.2 2.5 2.4 4 5.1 4 8 0 3.4-2.9 6.1-6.5 6.1S8 18.1 8 14.8c0-2.3 1.2-4.4 3.1-6.4.4 1.7 1.1 2.9 2.3 2.9 1.2 0 1.8-1 1.8-2.2 0-1.7-.9-3.1-2.2-6.1Z" fill="white"/></svg>`,
+  Water: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c3.5 4.4 5.6 7.2 5.6 10a5.6 5.6 0 1 1-11.2 0c0-2.8 2.1-5.6 5.6-10Z" fill="white"/></svg>`,
+  Electric: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 6 13h4l-1 9 9-12h-4l1-8Z" fill="white"/></svg>`,
+  Grass: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 4.5C11 5.2 6.3 10.1 6 18.5c8.5-.7 13.2-5.6 13.5-14Z" fill="white"/><path d="M7 17c3-3.5 6.4-6.1 10-8" ${iconStroke}/></svg>`,
+  Ice: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M4.5 7.5 19.5 16.5M4.5 16.5 19.5 7.5M8.6 5.3 12 8.2l3.4-2.9M8.6 18.7 12 15.8l3.4 2.9M6.1 10.1 9.9 12l-3.8 1.9M17.9 10.1 14.1 12l3.8 1.9" ${iconStroke}/></svg>`,
+  Fighting: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.4 12.6 8.8 8.7l2.2-2.2 2.4 1.1.6-1.9 2.2-.4 1.3 2.1-.6 2.4 1.7 1.8-1 5.3H9.8l-.4-4.3Z" fill="white"/></svg>`,
+  Poison: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v5l-4.5 7.6A3 3 0 0 0 8.1 20h7.8a3 3 0 0 0 2.6-4.4L14 8V3" ${iconStroke}/><circle cx="10" cy="13" r="1" fill="white"/><circle cx="14.5" cy="15.5" r="1" fill="white"/><circle cx="12.2" cy="17" r="1" fill="white"/></svg>`,
+  Ground: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18L16.2 8.5 12 15 7.8 6.5 3 18Z" fill="white"/></svg>`,
+  Flying: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13c3.3-.2 6.2-1.6 8.6-4.4.6 2.3.4 4.5-.5 6.6 2.5-.8 4.6-2.5 6.5-5.2-.3 4.9-3 8-8.1 9.3C7.8 20 5.5 18 4 13Z" fill="white"/></svg>`,
+  Psychic: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c2.3 0 4.2 1.9 4.2 4.2S14.3 13.4 12 13.4 7.8 11.5 7.8 9.2 9.7 5 12 5Zm0 10.7c3.8 0 6.6 1.7 7.9 3.3M12 15.7c-3.8 0-6.6 1.7-7.9 3.3" ${iconStroke}/><circle cx="12" cy="9.2" r="1.3" fill="white"/></svg>`,
+  Bug: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8c-2.5 0-4.5 2-4.5 4.5S9.5 17 12 17s4.5-2 4.5-4.5S14.5 8 12 8Z" ${iconStroke}/><path d="M9.2 8 7.5 5.8M14.8 8l1.7-2.2M7.3 11H4.5M19.5 11h-2.8M7.6 14.8l-2.2 1.8M16.4 14.8l2.2 1.8" ${iconStroke}/><path d="M12 8V5.5" ${iconStroke}/></svg>`,
+  Rock: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5h6.5l4 5-2.2 7H7.2L4.8 10.2 8 5.5Z" fill="white"/></svg>`,
+  Ghost: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 18.5V9.8A4.5 4.5 0 0 1 12 5.3a4.5 4.5 0 0 1 4.5 4.5v8.7l-2.1-1.6-2.4 1.6-2.4-1.6-2.1 1.6Z" fill="white"/><circle cx="10.2" cy="10.8" r="1" fill="#625d8d"/><circle cx="13.8" cy="10.8" r="1" fill="#625d8d"/></svg>`,
+  Dragon: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 17c5-1.5 8-4.7 8.8-9.8C14.5 8 13 9.5 13 11.3c0 1.9 1.3 3.2 3 3.7-1.2 2.3-3.8 4-8 4-.1-.9-.1-1.3 0-2Z" fill="white"/></svg>`,
+  Dark: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.8 4.7a8 8 0 1 0 4.5 14.7A8.8 8.8 0 1 1 14.8 4.7Z" fill="white"/></svg>`,
+  Steel: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 7v10l-7 4-7-4V7l7-4Z" ${iconStroke}/><circle cx="12" cy="12" r="2.2" fill="white"/></svg>`,
+  Fairy: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 1.6 4 4.4.3-3.4 2.8 1.1 4.3L12 13.5 8.3 15.4l1.1-4.3L6 8.3 10.4 8 12 4Z" fill="white"/></svg>`
+};
+
+const types = ["Normal","Fire","Water","Electric","Grass","Ice","Fighting","Poison","Ground","Flying","Psychic","Bug","Rock","Ghost","Dragon","Dark","Steel","Fairy"];
+const chart = {
+  Normal:{strong:[],weak:["Rock","Steel"],zero:["Ghost"]},
+  Fire:{strong:["Grass","Ice","Bug","Steel"],weak:["Fire","Water","Rock","Dragon"],zero:[]},
+  Water:{strong:["Fire","Ground","Rock"],weak:["Water","Grass","Dragon"],zero:[]},
+  Electric:{strong:["Water","Flying"],weak:["Electric","Grass","Dragon"],zero:["Ground"]},
+  Grass:{strong:["Water","Ground","Rock"],weak:["Fire","Grass","Poison","Flying","Bug","Dragon","Steel"],zero:[]},
+  Ice:{strong:["Grass","Ground","Flying","Dragon"],weak:["Fire","Water","Ice","Steel"],zero:[]},
+  Fighting:{strong:["Normal","Ice","Rock","Dark","Steel"],weak:["Poison","Flying","Psychic","Bug","Fairy"],zero:["Ghost"]},
+  Poison:{strong:["Grass","Fairy"],weak:["Poison","Ground","Rock","Ghost"],zero:["Steel"]},
+  Ground:{strong:["Fire","Electric","Poison","Rock","Steel"],weak:["Grass","Bug"],zero:["Flying"]},
+  Flying:{strong:["Grass","Fighting","Bug"],weak:["Electric","Rock","Steel"],zero:[]},
+  Psychic:{strong:["Fighting","Poison"],weak:["Psychic","Steel"],zero:["Dark"]},
+  Bug:{strong:["Grass","Psychic","Dark"],weak:["Fire","Fighting","Poison","Flying","Ghost","Steel","Fairy"],zero:[]},
+  Rock:{strong:["Fire","Ice","Flying","Bug"],weak:["Fighting","Ground","Steel"],zero:[]},
+  Ghost:{strong:["Psychic","Ghost"],weak:["Dark"],zero:["Normal"]},
+  Dragon:{strong:["Dragon"],weak:["Steel"],zero:["Fairy"]},
+  Dark:{strong:["Psychic","Ghost"],weak:["Fighting","Dark","Fairy"],zero:[]},
+  Steel:{strong:["Ice","Rock","Fairy"],weak:["Fire","Water","Electric","Steel"],zero:[]},
+  Fairy:{strong:["Fighting","Dragon","Dark"],weak:["Fire","Poison","Steel"],zero:[]}
+};
+
+let selected = "Fire";
+let mode = "attack";
+
+function mult(atk, def){
+  const row = chart[atk];
+  if(row.zero.includes(def)) return 0;
+  if(row.strong.includes(def)) return 2;
+  if(row.weak.includes(def)) return 0.5;
+  return 1;
+}
+
+function chip(type){
+  return `<span class="chip"><span class="mini ${type}">${icons[type]}</span>${type}</span>`;
+}
+
+function fill(id, arr){
+  document.getElementById(id).innerHTML = arr.length ? arr.map(chip).join("") : `<span class="empty">None</span>`;
+}
+
+function renderButtons(){
+  document.getElementById("typeButtons").innerHTML = types.map(name =>
+    `<button type="button" class="type-btn ${name} ${name===selected?"active":""}" data-type="${name}">
+      <span class="ico">${icons[name]}</span><span class="label">${name}</span>
+    </button>`
+  ).join("");
+  document.querySelectorAll(".type-btn").forEach(btn => {
+    btn.addEventListener("click", () => { selected = btn.dataset.type; render(); });
+  });
+}
+
+function render(){
+  renderButtons();
+
+  const am = document.getElementById("attackMode");
+  const dm = document.getElementById("defendMode");
+  am.classList.toggle("active", mode==="attack");
+  dm.classList.toggle("active", mode==="defend");
+
+  document.getElementById("selectedName").textContent = selected;
+  document.getElementById("selectedIcon").className = `bigicon ${selected}`;
+  document.getElementById("selectedIcon").innerHTML = icons[selected];
+  document.getElementById("modePill").textContent = mode==="attack" ? "ATTACKING" : "DEFENDING";
+
+  let strong=[], weak=[], zero=[], neutral=[];
+
+  if(mode==="attack"){
+    strong = chart[selected].strong;
+    weak = chart[selected].weak;
+    zero = chart[selected].zero;
+    neutral = types.filter(t => !strong.includes(t) && !weak.includes(t) && !zero.includes(t));
+    document.getElementById("selectedDesc").textContent = `When a ${selected}-type move attacks...`;
+    document.getElementById("goodTitle").textContent = "Super effective";
+    document.getElementById("badTitle").textContent = "Not very effective";
+    document.getElementById("neutralTitle").textContent = "Effective";
+  } else {
+    types.forEach(atk => {
+      const v = mult(atk, selected);
+      if(v === 2) strong.push(atk);
+      else if(v === 0.5) weak.push(atk);
+      else if(v === 0) zero.push(atk);
+      else neutral.push(atk);
+    });
+    document.getElementById("selectedDesc").textContent = `When a ${selected}-type Pokémon gets attacked...`;
+    document.getElementById("goodTitle").textContent = "Super effective against you";
+    document.getElementById("badTitle").textContent = "Not very effective against you";
+    document.getElementById("neutralTitle").textContent = "Effective against you";
+  }
+
+  fill("good", strong);
+  fill("neutral", neutral);
+  fill("bad", weak);
+  fill("zero", zero);
+}
+
+document.getElementById("attackMode").addEventListener("click", () => { mode = "attack"; render(); });
+document.getElementById("defendMode").addEventListener("click", () => { mode = "defend"; render(); });
+
+render();
+</script>
+</body>
+</html>
