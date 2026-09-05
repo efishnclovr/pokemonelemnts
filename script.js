@@ -23,9 +23,8 @@ const C={
 
 const K={Normal:"#9199a1",Fighting:"#d3425f",Flying:"#8fa8dc",Poison:"#a866c8",Ground:"#e17c3d",Rock:"#c9b57d",Bug:"#87c82a",Ghost:"#586fb4",Steel:"#5d98aa",Fire:"#ff9848",Water:"#4d91d8",Grass:"#61bd57",Electric:"#f4cf38",Psychic:"#f46f73",Ice:"#6bcac0",Dragon:"#1675c4",Dark:"#574f5e",Fairy:"#df78d9"};
 
-// These are the official in-game type assets from the Legends: Arceus asset set.
-const ICON_BASE="https://pokesprite.tootaio.com/sprites/types/generation-viii/legends-arceus/";
-const ICON_ID={Normal:1,Fighting:2,Flying:3,Poison:4,Ground:5,Rock:6,Bug:7,Ghost:8,Steel:9,Fire:10,Water:11,Grass:12,Electric:13,Psychic:14,Ice:15,Dragon:16,Dark:17,Fairy:18};
+// Circular type icon recreations matching the modern Pokémon game style.
+const ICON_BASE="https://raw.githubusercontent.com/partywhale/pokemon-type-icons/main/icons/";
 
 let a="Fire",b=null,slot=1;
 const $=s=>document.querySelector(s);
@@ -35,8 +34,12 @@ function mult(atk,def){
   return r.zero.includes(def)?0:r.strong.includes(def)?2:r.weak.includes(def)?0.5:1;
 }
 
+function iconUrl(t){
+  return `${ICON_BASE}${t.toLowerCase()}.svg`;
+}
+
 function icon(t,cl="smallicon"){
-  return `<span class="${cl}"><img src="${ICON_BASE}${ICON_ID[t]}.png" alt="${t} type icon" loading="eager"></span>`;
+  return `<span class="${cl}"><img src="${iconUrl(t)}" alt="${t} type icon" loading="eager"></span>`;
 }
 
 function chip(t){
@@ -66,10 +69,10 @@ function renderSlots(){
   $("#slot1").classList.toggle("active",slot===1);
   $("#slot2").classList.toggle("active",slot===2);
   $("#slot1name").textContent=a;
-  $("#slot1icon").innerHTML=`<img src="${ICON_BASE}${ICON_ID[a]}.png" alt="${a} type icon">`;
+  $("#slot1icon").innerHTML=`<img src="${iconUrl(a)}" alt="${a} type icon">`;
   $("#slot2name").textContent=b||"Tap here, then choose a type";
   $("#slot2icon").hidden=!b;
-  $("#slot2icon").innerHTML=b?`<img src="${ICON_BASE}${ICON_ID[b]}.png" alt="${b} type icon">`:"";
+  $("#slot2icon").innerHTML=b?`<img src="${iconUrl(b)}" alt="${b} type icon">`:"";
   $("#clear2").hidden=!b;
 }
 
