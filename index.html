@@ -1,8 +1,67 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c1017"><title>Pokémon Type Quick Checker</title><link rel="stylesheet" href="styles.css?v=2"></head>
-<body><main class="app"><h1>Pokémon Type Quick Checker</h1><p class="lead">Pick one type, or add a second type for a dual-type Pokémon. Attacking and defending matchups are always shown together.</p>
-<div class="slotbar"><button class="slot active" id="slot1" type="button"><small>TYPE 1</small><span class="slotrow"><span class="smallicon" id="slot1icon"></span><span id="slot1name">Fire</span></span></button><button class="slot" id="slot2" type="button"><small>TYPE 2 · OPTIONAL</small><span class="slotrow"><span class="smallicon" id="slot2icon" hidden></span><span id="slot2name">Tap here, then choose a type</span></span></button><button class="clear" id="clear2" type="button" title="Remove second type" hidden>Clear</button></div>
-<section id="typegrid" class="typegrid"></section><div class="summary" id="summary"></div>
-<section class="layout"><div class="panel"><h2>Attacking</h2><p class="hint">Each move has one type, so dual-type Pokémon get a separate attack chart for each of their types.</p><div class="attackcards" id="attackcards"></div></div>
-<div class="panel"><h2>Defending</h2><p class="hint">For dual types, both types are combined automatically.</p><div class="defgroups"><div class="group"><h3>Weak against</h3><div class="chips" id="defweak"></div></div><div class="group"><h3>Effective against you</h3><div class="chips" id="defneutral"></div></div><div class="group"><h3>Not very effective against you</h3><div class="chips" id="defresist"></div></div><div class="group"><h3>No effect</h3><div class="chips" id="defzero"></div></div></div></div></section>
-<p class="foot">“Effective” means normal damage. Abilities, held items and move-specific effects can change a matchup in battle.</p></main><script src="script.js?v=2"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1017">
+<title>Pokémon Type Quick Checker</title>
+<link rel="stylesheet" href="styles.css?v=4">
+</head>
+<body>
+<main class="app">
+<h1>Pokémon Type Quick Checker</h1>
+<p class="lead">Pick a type to see what it is <b>strong against</b>, <b>weak against</b>, and how effective the rest of the matchups are. Add a second type for dual-type Pokémon.</p>
+
+<div class="slotbar">
+  <button class="slot active" id="slot1" type="button">
+    <small>TYPE 1</small>
+    <span class="slotrow"><span class="smallicon" id="slot1icon"></span><span id="slot1name">Fire</span></span>
+  </button>
+  <button class="slot" id="slot2" type="button">
+    <small>TYPE 2 · OPTIONAL</small>
+    <span class="slotrow"><span class="smallicon" id="slot2icon" hidden></span><span id="slot2name">Tap here, then choose a type</span></span>
+  </button>
+  <button class="clear" id="clear2" type="button" hidden>Clear</button>
+</div>
+
+<section id="typegrid" class="typegrid"></section>
+<div class="summary" id="summary"></div>
+
+<section class="headline-grid">
+  <div class="panel">
+    <h2>Strong against</h2>
+    <p class="hint">Types your selected Pokémon can hit with a super effective same-type move.</p>
+    <div class="chips" id="strong"></div>
+  </div>
+  <div class="panel">
+    <h2>Weak against</h2>
+    <p class="hint">Types that can hit your selected Pokémon super effectively.</p>
+    <div class="chips" id="weak"></div>
+  </div>
+</section>
+
+<section class="panel overall-panel">
+  <h2>Overall effectiveness</h2>
+  <p class="hint">The full matchup using the same effectiveness wording from the games.</p>
+  <div class="overall-grid">
+    <div>
+      <div class="section-label">Your moves</div>
+      <div class="attackcards" id="moveSets"></div>
+    </div>
+    <div>
+      <div class="section-label">Moves used on you</div>
+      <div class="groups">
+        <div class="group"><h3>Super effective</h3><div class="chips" id="incomingStrong"></div></div>
+        <div class="group"><h3>Effective</h3><div class="chips" id="incomingNeutral"></div></div>
+        <div class="group"><h3>Not very effective</h3><div class="chips" id="incomingResist"></div></div>
+        <div class="group"><h3>No effect</h3><div class="chips" id="incomingZero"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="foot">“Effective” means normal damage. Abilities, held items, and special move effects can change individual matchups.</p>
+</main>
+<script src="script.js?v=4"></script>
+</body>
+</html>
