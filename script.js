@@ -1,15 +1,135 @@
-const T=["Normal","Fire","Water","Electric","Grass","Ice","Fighting","Poison","Ground","Flying","Psychic","Bug","Rock","Ghost","Dragon","Dark","Steel","Fairy"],C={"Normal":{"strong":[],"weak":["Rock","Steel"],"zero":["Ghost"]},"Fire":{"strong":["Grass","Ice","Bug","Steel"],"weak":["Fire","Water","Rock","Dragon"],"zero":[]},"Water":{"strong":["Fire","Ground","Rock"],"weak":["Water","Grass","Dragon"],"zero":[]},"Electric":{"strong":["Water","Flying"],"weak":["Electric","Grass","Dragon"],"zero":["Ground"]},"Grass":{"strong":["Water","Ground","Rock"],"weak":["Fire","Grass","Poison","Flying","Bug","Dragon","Steel"],"zero":[]},"Ice":{"strong":["Grass","Ground","Flying","Dragon"],"weak":["Fire","Water","Ice","Steel"],"zero":[]},"Fighting":{"strong":["Normal","Ice","Rock","Dark","Steel"],"weak":["Poison","Flying","Psychic","Bug","Fairy"],"zero":["Ghost"]},"Poison":{"strong":["Grass","Fairy"],"weak":["Poison","Ground","Rock","Ghost"],"zero":["Steel"]},"Ground":{"strong":["Fire","Electric","Poison","Rock","Steel"],"weak":["Grass","Bug"],"zero":["Flying"]},"Flying":{"strong":["Grass","Fighting","Bug"],"weak":["Electric","Rock","Steel"],"zero":[]},"Psychic":{"strong":["Fighting","Poison"],"weak":["Psychic","Steel"],"zero":["Dark"]},"Bug":{"strong":["Grass","Psychic","Dark"],"weak":["Fire","Fighting","Poison","Flying","Ghost","Steel","Fairy"],"zero":[]},"Rock":{"strong":["Fire","Ice","Flying","Bug"],"weak":["Fighting","Ground","Steel"],"zero":[]},"Ghost":{"strong":["Psychic","Ghost"],"weak":["Dark"],"zero":["Normal"]},"Dragon":{"strong":["Dragon"],"weak":["Steel"],"zero":["Fairy"]},"Dark":{"strong":["Psychic","Ghost"],"weak":["Fighting","Dark","Fairy"],"zero":[]},"Steel":{"strong":["Ice","Rock","Fairy"],"weak":["Fire","Water","Electric","Steel"],"zero":[]},"Fairy":{"strong":["Fighting","Dragon","Dark"],"weak":["Fire","Poison","Steel"],"zero":[]}},P={"Normal":{"x":0,"y":0},"Fighting":{"x":20,"y":0},"Flying":{"x":40,"y":0},"Poison":{"x":60,"y":0},"Ground":{"x":80,"y":0},"Rock":{"x":100,"y":0},"Bug":{"x":0,"y":50},"Ghost":{"x":20,"y":50},"Steel":{"x":40,"y":50},"Fire":{"x":60,"y":50},"Water":{"x":80,"y":50},"Grass":{"x":100,"y":50},"Electric":{"x":0,"y":100},"Psychic":{"x":20,"y":100},"Ice":{"x":40,"y":100},"Dragon":{"x":60,"y":100},"Dark":{"x":80,"y":100},"Fairy":{"x":100,"y":100}},K={"Normal":"#9199a1","Fighting":"#d3425f","Flying":"#8fa8dc","Poison":"#a866c8","Ground":"#e17c3d","Rock":"#c9b57d","Bug":"#87c82a","Ghost":"#586fb4","Steel":"#5d98aa","Fire":"#ff9848","Water":"#4d91d8","Grass":"#61bd57","Electric":"#f4cf38","Psychic":"#f46f73","Ice":"#6bcac0","Dragon":"#1675c4","Dark":"#574f5e","Fairy":"#df78d9"};
-const SPRITE='https://raw.githubusercontent.com/efishnclovr/pokemonelemnts/101f5bdc63376ab18bd5a2737d2d1127373caa26/type-icons.png';
-let a="Fire",b=null,slot=1;const $=s=>document.querySelector(s);
-function sty(el,t){if(!t)return;el.style.backgroundImage=`url("${SPRITE}")`;el.style.backgroundSize="600% 300%";el.style.backgroundRepeat="no-repeat";el.style.backgroundPosition=P[t].x+"% "+P[t].y+"%"}
-function mult(atk,def){let r=C[atk];return r.zero.includes(def)?0:r.strong.includes(def)?2:r.weak.includes(def)?.5:1}
-function icon(t,cl="smallicon"){return `<span class="${cl}" data-icon="${t}" aria-label="${t} type icon"></span>`}function chip(t){return `<span class="chip">${icon(t)}${t}</span>`}
-function paintIcons(root=document){root.querySelectorAll("[data-icon]").forEach(e=>sty(e,e.dataset.icon))}function fill(id,arr){$(`#${id}`).innerHTML=arr.length?arr.map(chip).join(""):'<span class="empty">None</span>'}
-function attackCard(t){let s=C[t].strong,w=C[t].weak,z=C[t].zero,n=T.filter(x=>!s.includes(x)&&!w.includes(x)&&!z.includes(x));return `<article class="attackcard"><div class="attackhead">${icon(t)}<span>${t} moves</span></div><div class="groups"><div class="group"><h3>Super effective</h3><div class="chips">${s.length?s.map(chip).join(""):'<span class="empty">None</span>'}</div></div><div class="group"><h3>Effective</h3><div class="chips">${n.map(chip).join("")}</div></div><div class="group"><h3>Not very effective</h3><div class="chips">${w.length?w.map(chip).join(""):'<span class="empty">None</span>'}</div></div><div class="group"><h3>No effect</h3><div class="chips">${z.length?z.map(chip).join(""):'<span class="empty">None</span>'}</div></div></div></article>`}
-function renderGrid(){$("#typegrid").innerHTML=T.map(t=>`<button type="button" class="typebtn ${t===a||t===b?'selected':''}" data-type="${t}" style="background:${K[t]}">${icon(t,"icon")}<span class="typename">${t}</span></button>`).join("");$("#typegrid").querySelectorAll("button").forEach(x=>x.onclick=()=>choose(x.dataset.type));paintIcons($("#typegrid"))}
-function choose(t){if(slot===1){a=t;if(b===a)b=null}else{b=t===a?null:t}render()}
-function renderSlots(){$("#slot1").classList.toggle("active",slot===1);$("#slot2").classList.toggle("active",slot===2);$("#slot1name").textContent=a;sty($("#slot1icon"),a);$("#slot2name").textContent=b||"Tap here, then choose a type";$("#slot2icon").hidden=!b;if(b)sty($("#slot2icon"),b);$("#clear2").hidden=!b}
-function renderSummary(){$("#summary").innerHTML=`${icon(a,"icon")}<strong>${a}</strong>${b?`<span class="plus">+</span>${icon(b,"icon")}<strong>${b}</strong>`:""}`;paintIcons($("#summary"))}
-function renderAttack(){$("#attackcards").innerHTML=attackCard(a)+(b?attackCard(b):"");paintIcons($("#attackcards"))}
-function renderDefense(){let weak=[],neutral=[],resist=[],zero=[];T.forEach(t=>{let v=mult(t,a)*(b?mult(t,b):1);if(v===0)zero.push(t);else if(v>1)weak.push(t);else if(v<1)resist.push(t);else neutral.push(t)});fill("defweak",weak);fill("defneutral",neutral);fill("defresist",resist);fill("defzero",zero);paintIcons($(".defgroups"))}
-function render(){renderSlots();renderGrid();renderSummary();renderAttack();renderDefense()}$("#slot1").onclick=()=>{slot=1;renderSlots()};$("#slot2").onclick=()=>{slot=2;renderSlots()};$("#clear2").onclick=()=>{b=null;slot=1;render()};render();
+const T=["Normal","Fire","Water","Electric","Grass","Ice","Fighting","Poison","Ground","Flying","Psychic","Bug","Rock","Ghost","Dragon","Dark","Steel","Fairy"];
+
+const C={
+  Normal:{strong:[],weak:["Rock","Steel"],zero:["Ghost"]},
+  Fire:{strong:["Grass","Ice","Bug","Steel"],weak:["Fire","Water","Rock","Dragon"],zero:[]},
+  Water:{strong:["Fire","Ground","Rock"],weak:["Water","Grass","Dragon"],zero:[]},
+  Electric:{strong:["Water","Flying"],weak:["Electric","Grass","Dragon"],zero:["Ground"]},
+  Grass:{strong:["Water","Ground","Rock"],weak:["Fire","Grass","Poison","Flying","Bug","Dragon","Steel"],zero:[]},
+  Ice:{strong:["Grass","Ground","Flying","Dragon"],weak:["Fire","Water","Ice","Steel"],zero:[]},
+  Fighting:{strong:["Normal","Ice","Rock","Dark","Steel"],weak:["Poison","Flying","Psychic","Bug","Fairy"],zero:["Ghost"]},
+  Poison:{strong:["Grass","Fairy"],weak:["Poison","Ground","Rock","Ghost"],zero:["Steel"]},
+  Ground:{strong:["Fire","Electric","Poison","Rock","Steel"],weak:["Grass","Bug"],zero:["Flying"]},
+  Flying:{strong:["Grass","Fighting","Bug"],weak:["Electric","Rock","Steel"],zero:[]},
+  Psychic:{strong:["Fighting","Poison"],weak:["Psychic","Steel"],zero:["Dark"]},
+  Bug:{strong:["Grass","Psychic","Dark"],weak:["Fire","Fighting","Poison","Flying","Ghost","Steel","Fairy"],zero:[]},
+  Rock:{strong:["Fire","Ice","Flying","Bug"],weak:["Fighting","Ground","Steel"],zero:[]},
+  Ghost:{strong:["Psychic","Ghost"],weak:["Dark"],zero:["Normal"]},
+  Dragon:{strong:["Dragon"],weak:["Steel"],zero:["Fairy"]},
+  Dark:{strong:["Psychic","Ghost"],weak:["Fighting","Dark","Fairy"],zero:[]},
+  Steel:{strong:["Ice","Rock","Fairy"],weak:["Fire","Water","Electric","Steel"],zero:[]},
+  Fairy:{strong:["Fighting","Dragon","Dark"],weak:["Fire","Poison","Steel"],zero:[]}
+};
+
+const K={Normal:"#9199a1",Fighting:"#d3425f",Flying:"#8fa8dc",Poison:"#a866c8",Ground:"#e17c3d",Rock:"#c9b57d",Bug:"#87c82a",Ghost:"#586fb4",Steel:"#5d98aa",Fire:"#ff9848",Water:"#4d91d8",Grass:"#61bd57",Electric:"#f4cf38",Psychic:"#f46f73",Ice:"#6bcac0",Dragon:"#1675c4",Dark:"#574f5e",Fairy:"#df78d9"};
+
+// These are the official in-game type assets from the Legends: Arceus asset set.
+const ICON_BASE="https://pokesprite.tootaio.com/sprites/types/generation-viii/legends-arceus/";
+const ICON_ID={Normal:1,Fighting:2,Flying:3,Poison:4,Ground:5,Rock:6,Bug:7,Ghost:8,Steel:9,Fire:10,Water:11,Grass:12,Electric:13,Psychic:14,Ice:15,Dragon:16,Dark:17,Fairy:18};
+
+let a="Fire",b=null,slot=1;
+const $=s=>document.querySelector(s);
+
+function mult(atk,def){
+  const r=C[atk];
+  return r.zero.includes(def)?0:r.strong.includes(def)?2:r.weak.includes(def)?0.5:1;
+}
+
+function icon(t,cl="smallicon"){
+  return `<span class="${cl}"><img src="${ICON_BASE}${ICON_ID[t]}.png" alt="${t} type icon" loading="eager"></span>`;
+}
+
+function chip(t){
+  return `<span class="chip">${icon(t,"mini")}${t}</span>`;
+}
+
+function fill(id,arr){
+  $(`#${id}`).innerHTML=arr.length?arr.map(chip).join(""):'<span class="empty">None</span>';
+}
+
+function renderGrid(){
+  $("#typegrid").innerHTML=T.map(t=>`<button type="button" class="typebtn ${t===a||t===b?'selected':''}" data-type="${t}" style="background:${K[t]}">${icon(t,"icon")}<span class="typename">${t}</span></button>`).join("");
+  $("#typegrid").querySelectorAll("button").forEach(x=>x.onclick=()=>choose(x.dataset.type));
+}
+
+function choose(t){
+  if(slot===1){
+    a=t;
+    if(b===a)b=null;
+  }else{
+    b=t===a?null:t;
+  }
+  render();
+}
+
+function renderSlots(){
+  $("#slot1").classList.toggle("active",slot===1);
+  $("#slot2").classList.toggle("active",slot===2);
+  $("#slot1name").textContent=a;
+  $("#slot1icon").innerHTML=`<img src="${ICON_BASE}${ICON_ID[a]}.png" alt="${a} type icon">`;
+  $("#slot2name").textContent=b||"Tap here, then choose a type";
+  $("#slot2icon").hidden=!b;
+  $("#slot2icon").innerHTML=b?`<img src="${ICON_BASE}${ICON_ID[b]}.png" alt="${b} type icon">`:"";
+  $("#clear2").hidden=!b;
+}
+
+function renderSummary(){
+  $("#summary").innerHTML=`${icon(a,"icon")}<strong>${a}</strong>${b?`<span class="plus">+</span>${icon(b,"icon")}<strong>${b}</strong>`:""}`;
+}
+
+function renderStrongWeak(){
+  const strong=[...new Set([...C[a].strong,...(b?C[b].strong:[])])].sort((x,y)=>T.indexOf(x)-T.indexOf(y));
+  const weak=[];
+  T.forEach(t=>{
+    const v=mult(t,a)*(b?mult(t,b):1);
+    if(v>1)weak.push(t);
+  });
+  fill("strong",strong);
+  fill("weak",weak);
+}
+
+function moveCard(t){
+  const s=C[t].strong,w=C[t].weak,z=C[t].zero;
+  const n=T.filter(x=>!s.includes(x)&&!w.includes(x)&&!z.includes(x));
+  return `<article class="attackcard">
+    <div class="attackhead">${icon(t,"smallicon")}<span>${t} moves</span></div>
+    <div class="groups">
+      <div class="group"><h3>Super effective</h3><div class="chips">${s.length?s.map(chip).join(""):'<span class="empty">None</span>'}</div></div>
+      <div class="group"><h3>Effective</h3><div class="chips">${n.map(chip).join("")}</div></div>
+      <div class="group"><h3>Not very effective</h3><div class="chips">${w.length?w.map(chip).join(""):'<span class="empty">None</span>'}</div></div>
+      <div class="group"><h3>No effect</h3><div class="chips">${z.length?z.map(chip).join(""):'<span class="empty">None</span>'}</div></div>
+    </div>
+  </article>`;
+}
+
+function renderOverall(){
+  $("#moveSets").innerHTML=moveCard(a)+(b?moveCard(b):"");
+
+  const incomingStrong=[],incomingNeutral=[],incomingResist=[],incomingZero=[];
+  T.forEach(t=>{
+    const v=mult(t,a)*(b?mult(t,b):1);
+    if(v===0)incomingZero.push(t);
+    else if(v>1)incomingStrong.push(t);
+    else if(v<1)incomingResist.push(t);
+    else incomingNeutral.push(t);
+  });
+
+  fill("incomingStrong",incomingStrong);
+  fill("incomingNeutral",incomingNeutral);
+  fill("incomingResist",incomingResist);
+  fill("incomingZero",incomingZero);
+}
+
+function render(){
+  renderSlots();
+  renderGrid();
+  renderSummary();
+  renderStrongWeak();
+  renderOverall();
+}
+
+$("#slot1").onclick=()=>{slot=1;renderSlots()};
+$("#slot2").onclick=()=>{slot=2;renderSlots()};
+$("#clear2").onclick=()=>{b=null;slot=1;render()};
+
+render();
